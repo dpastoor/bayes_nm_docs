@@ -187,3 +187,97 @@ You may request a more precise gradient precision (SIGL) that differed from that
 ```
 
 REFERENCES: Guide Introduction_7
+
+# Final control stream:
+
+```
+
+;Model Desc: Two compartment Model, Using ADVAN3, TRANS4
+;Project Name: nm7examples
+;Project ID: NO PROJECT DESCRIPTION
+
+$PROB RUN# Example 1 (from samp5l)
+$INPUT C SET ID JID TIME  DV=CONC AMT=DOSE RATE EVID MDV CMT CLX V1X QX V2X SDIX SDSX
+$DATA example1.csv IGNORE=C
+
+$SUBROUTINES ADVAN3 TRANS4
+
+$PRIOR NWPRI NTHETA=4, NETA=4, NTHP=4, NETP=4
+
+$PK
+MU_1=THETA(1)
+MU_2=THETA(2)
+MU_3=THETA(3)
+MU_4=THETA(4)
+CL=DEXP(MU_1+ETA(1))
+V1=DEXP(MU_2+ETA(2))
+Q=DEXP(MU_3+ETA(3))
+V2=DEXP(MU_4+ETA(4))
+S1=V1
+
+$ERROR
+Y = F + F*EPS(1)
+
+; Initial values of THETA
+
+$THETA 
+(0.001, 2.0) ;[LN(CL)]
+(0.001, 2.0) ;[LN(V1)]
+(0.001, 2.0) ;[LN(Q)]
+(0.001, 2.0) ;[LN(V2)]
+
+;INITIAL values of OMEGA
+$OMEGA BLOCK(4)
+0.15   ;[P]
+0.01  ;[F]
+0.15   ;[P]
+0.01  ;[F]
+0.01  ;[F]
+0.15   ;[P]
+0.01  ;[F]
+0.01  ;[F]
+0.01  ;[F]
+0.15   ;[P]
+
+;Initial value of SIGMA
+$SIGMA 
+(0.6 )   ;[P]
+
+; Prior information of THETAS
+$THETA (2.0 FIX) (2.0 FIX) (2.0 FIX) (2.0 FIX)
+
+; Variance to prior information of THETAS.  Because variances are very large, this
+; means that the prior information to the THETAS is highly uninformative.
+$OMEGA BLOCK(4)
+10000 FIX 
+0.00 10000
+0.00  0.00 10000
+0.00  0.00 0.0 10000
+
+; Prior information to the OMEGAS.
+$OMEGA BLOCK(4)
+0.2 FIX 
+0.0  0.2 
+0.0  0.0 0.2
+0.0  0.0 0.0 0.2
+
+;Degrees of freedom to prior OMEGA matrix.  Because degrees of freedom is very low, equal to the
+; the dimension of the prior OMEGA, this means that the prior information to the OMEGAS is
+; highly uninformative
+$THETA (4 FIX)
+
+$EST METHOD=ITS INTERACTION FILE=example1.ext NITER=500 PRINT=5 NOABORT SIGL=4 CTYPE=3 CITER=10   
+     CALPHA=0.05 NOPRIOR=1 NSIG=2
+$EST METHOD=SAEM INTERACTION NBURN=3000 NITER=500 PRINT=100 SEED=1556678 ISAMPLE=2
+$EST METHOD=IMP MAPITER=0 INTERACTION EONLY=1 NITER=5 ISAMPLE=3000 PRINT=1 SIGL=8 NOPRIOR=1
+$EST METHOD=BAYES INTERACTION FILE=example1.txt NBURN=10000 NITER=10000 PRINT=100 NOPRIOR=0
+$EST METHOD=COND INTERACTION MAXEVAL=9999 NSIG=3 SIGL=10 PRINT=5 NOABORT NOPRIOR=1
+     FILE=example1.ext
+
+$COV MATRIX=R PRINT=E UNCONDITIONAL SIGL=12
+
+$TABLE ID TIME PRED RES WRES CPRED CWRES EPRED ERES EWRES NOAPPEND ONEHEADER 
+ FILE=example1.TAB NOPRINT
+$TABLE ID CL V1 Q V2 FIRSTONLY NOAPPEND NOPRINT FILE=example1.PAR
+$TABLE ID ETA1 ETA2 ETA3 ETA4 FIRSTONLY NOAPPEND NOPRINT FILE=example1.ETA
+```
