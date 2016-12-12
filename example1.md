@@ -85,6 +85,9 @@ information to the THETAS is highly uninformative.
  ; Prior information of THETAS
  $THETA (2.0 FIX) (2.0 FIX) (2.0 FIX) (2.0 FIX)
 ```
+While this has intuitive appeal (we don't let the prior influence parameter values when the data is
+much more informative), the analyst should take care whether ALL values of parameters are likely and/or
+valid.
 
 Degrees of freedom to prior OMEGA matrix. Because degrees of freedom is very low, equal to the the
 dimension of the prior OMEGA, this means that the  prior information to the OMEGAS is highly uninformative
@@ -108,6 +111,14 @@ dimension of the prior OMEGA, this means that the  prior information to the OMEG
 ```
  $THETA (4 FIX)
 ```
+
+Note though that uninformative, (log)Normal distributions on between subject variance parameters [have been
+criticised by Andrew Gelman](http://www.stat.columbia.edu/~gelman/research/published/taumain.pdf). The argument
+is that we might wish to allow effectively zero between-subject variability in some cases (equivalent to a fixed
+population value for all subjects) and uninformative Normal priors do not give enough probability to that possibility,
+thus biasing the between subject variability upward. Also, uninformative priors essentially say that huge between subject
+variability is **as likely as** tiny values. The analyst may wish to look at sensitivity to prior choice, especially in 
+these parameters and its influence on shrinkage.
 
 The first analysis is iterative two-stage,
 
